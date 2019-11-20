@@ -210,10 +210,9 @@ int main()
 
 	// matrix coordinates 
 	// -----------------------------------
+
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-
 
 	// projection matrix
 	glm::mat4 projection = glm::mat4(1.0f);
@@ -228,10 +227,15 @@ int main()
 	glfwSetFramebufferSizeCallback(window, frameBuffer_size_callback);
 	
 	glm::mat4 rotation = glm::mat4(1.0f);
+
 	glm::mat4 translate = glm::mat4(1.0f);
 	
 	while (!glfwWindowShouldClose(window))
 	{
+		GLfloat currentFrame = glfwGetTime();
+
+		deltaTime = lastFrame - currentFrame;
+		lastFrame = currentFrame;
 
 		glm::mat4 view = glm::lookAt(cameraPos, cameraFront + cameraPos, cameraUp);
 
@@ -253,6 +257,8 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
+		rotation = glm::rotate(rotation,(float)(glm::radians(10.0f)* deltaTime), glm::vec3(1.0f, 2.0f, 3.0f));
+		ourShader.setMat4("rotation", rotation);
 
 		//GLfloat timeValue = glfwGetTime();
 		//GLfloat greenValue = (sin(timeValue) / 2.0f) + 0.5f;
@@ -290,7 +296,7 @@ void frameBuffer_size_callback(GLFWwindow* window, int width, int height)
 void processinput(GLFWwindow* window)
 {
 
-	float cameraSpeed = 0.0005f;
+	float cameraSpeed = 2.5f * deltaTime;
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
