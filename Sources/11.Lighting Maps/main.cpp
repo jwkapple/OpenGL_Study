@@ -257,10 +257,6 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, specularMap);
 
 
-	/*	glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
-	*/
-
 		rotation = glm::rotate(rotation,(float)(glm::radians(10.0f)* deltaTime), glm::vec3(1.0f, 2.0f, 3.0f));
 
 		glm::mat4 model = glm::mat4(1.0f);
@@ -273,8 +269,6 @@ int main()
 		objectShader.setMat4("projection", projection);
 		objectShader.setMat4("rotation", rotation);
 		objectShader.setVec3("cameraPos", cameraPos);
-		objectShader.setVec3("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-		objectShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 		objectShader.setInt("material.diffuse", 0);
 		objectShader.setInt("material.specular", 1);
 
