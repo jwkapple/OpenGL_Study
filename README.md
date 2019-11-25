@@ -8,7 +8,7 @@ Always welcome for advice about refactoring or code error.
 
 ---
 
-### On-going 
+### On-going & Completed
 
 - 2019.11 ~ :: OpenGL https://learnopengl.com
 - 2019.06 ~ 2019.10 :: DirectX11 http://www.rastertek.com/
