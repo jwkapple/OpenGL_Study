@@ -12,15 +12,29 @@ struct Material
 struct Light
 {
 	vec3 position;
+	vec3 direction;
+	float cutOff;
+
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	
+	float constant;
+	float linear;
+	float quadratic;
+	
+	vec3 color;
+};
+
+struct LightBox
+{
+	vec3 position;
 	
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
-};
-
-struct DirectionalLight
-{
-	vec3 direction;
+	
+	vec3 color;
 };
 
 in vec3 FragNormal;
@@ -29,44 +43,73 @@ in vec2 FragTexCoord;
 
 uniform Material material;
 uniform Light light;
-uniform DirectionalLight directLight;
-
-
-uniform vec3 lightPos;
-uniform vec3 cameraPos;
+uniform LightBox lightBox;
+uniform Light sunLight;
 
 
 void main()
 {
-
-	// Previous Light Setting :: 00 
-
+	// ===================================
+	// Viewer Light
+	// ===================================
 	vec3 norm = normalize(FragNormal);
 	vec3 lightDir = normalize(light.position - FragPos);
-	float diff = max(dot(lightDir,FragNormal),0.0);
-	vec3 diffuse = diff * vec3(texture(material.diffuse,FragTexCoord)) * light.diffuse;
-
-	vec3 ambient = light.ambient * vec3(texture(material.diffuse,FragTexCoord));
+	float diff = max(dot(lightDir,norm),0.0);
 	
-	vec3 viewDir = normalize(cameraPos - FragPos);
-	vec3 reflec = reflect(norm,-lightDir);
-	float result = pow(max(dot(reflec,viewDir),0.0),material.shininess);
-	vec3 specular = light.specular * result * vec3(texture(material.specular,FragTexCoord));
-
-	// Directional Light Setting :: 01
 	
-	vec3 directLightDir = normalize(-directLight.direction);
-	float directDiff = max(dot(directLightDir,FragNormal),0.0);
-	vec3 directDiffuse = directDiff * vec3(texture(material.diffuse,FragTexCoord)) * light.diffuse;
+	vec3 diffuse = vec3(0.0);
+	vec3 ambient = vec3(0.0);
+	vec3 specular = vec3(0.0);
 
+	float theta = dot(lightDir,normalize(-light.direction));
+	
+	if(theta > light.cutOff)
+	{
+	diffuse = light.diffuse * diff * vec3(texture(material.diffuse,FragTexCoord));
+	specular = light.specular * diff * vec3(texture(material.specular,FragTexCoord));
+	}
 
-	vec3 directReflec = reflect(directLightDir,norm);
-	float directResult = pow(max(dot(directReflec,viewDir),0.0),material.shininess);
-	vec3 directSpecular = light.specular * directResult * vec3(texture(material.specular,FragTexCoord));
+	ambient = light.ambient * vec3(texture(material.diffuse,FragTexCoord));
 
-	vec4 color = vec4((ambient + directDiffuse + directSpecular),1.0);
+	// ===================================
+	// Sun Box Light (Point Light)
+	// ===================================
 
+	float distance = length(sunLight.position - FragPos);
+	float attenuation = 1.0 / (sunLight.constant + sunLight.linear * distance + sunLight.quadratic * (distance * distance));
 
-	FragColor = color ;
+	vec3 sunLightDir = normalize(sunLight.position - FragPos);
+	float sunDiff = max(dot(sunLightDir,norm),0.0);
+	
+	vec3 sunDiffuse = sunDiff * vec3(texture(material.diffuse,FragTexCoord)) * attenuation;
+
+	vec3 sunAmbient = vec3(1.0) * attenuation;
+
+	vec3 viewDir = normalize(light.position - FragPos);
+	vec3 sunReflec = reflect(-norm,sunLightDir);
+	float sunResult = pow(max(dot(sunReflec,viewDir),0.0),material.shininess);
+
+	vec3 sunSpecular = sunResult * vec3(texture(material.specular,FragTexCoord)) * attenuation;
+	
+	// ===================================
+	// Moving Box Light 
+	// ===================================
+
+	vec3 boxLightDir = normalize(lightBox.position - FragPos);
+	float boxDiff = max(dot(boxLightDir,norm),0.0);
+	
+	vec3 boxDiffuse = boxDiff * vec3(texture(material.diffuse,FragTexCoord));
+
+	vec3 boxAmbient = vec3(0.0);
+
+	vec3 boxReflec = reflect(-norm,boxLightDir);
+	float boxResult = pow(max(dot(boxReflec,viewDir),0.0),material.shininess);
+	
+	vec3 boxSpecular = boxResult * vec3(texture(material.specular,FragTexCoord));
+	
+	vec4 enviorment = mix(vec4((sunDiffuse + sunAmbient + sunSpecular)* sunLight.color,1.0),vec4((boxDiffuse + boxAmbient + boxSpecular)* lightBox.color,1.0) , 0.5);
+	vec4 viewer = vec4((diffuse + ambient + specular),1.0);
+
+	FragColor =  mix(enviorment,viewer,0.5);
 	
 }

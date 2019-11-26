@@ -20,6 +20,7 @@ unsigned int loadTexture(const char *path);
 
 // camera
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
+glm::vec3 greenSunPos = glm::vec3(-5.0f, 0.0f, -1.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 const glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f,0.0f);
 
@@ -206,8 +207,11 @@ int main()
 	glBindVertexArray(LampVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 
 	// matrix coordinates 
@@ -268,9 +272,7 @@ int main()
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, specularMap);
-
-
-		rotation = glm::rotate(rotation,(float)(glm::radians(10.0f)* deltaTime), glm::vec3(1.0f, 2.0f, 3.0f));
+		
 
 		glm::mat4 model = glm::mat4(1.0f);
 
@@ -280,16 +282,33 @@ int main()
 		objectShader.setMat4("translate", model);
 		objectShader.setMat4("model", model);
 		objectShader.setMat4("projection", projection);
-		objectShader.setMat4("rotation", rotation);
-		objectShader.setVec3("cameraPos", cameraPos);
+		objectShader.setMat4("rotation", glm::mat4(1.0f));
 		objectShader.setInt("material.diffuse", 0);
 		objectShader.setInt("material.specular", 1);
 
-		objectShader.setVec3("light.position", lightPos);
-		objectShader.setVec3("light.ambient", glm::vec3(1.0f));
-		objectShader.setVec3("light.diffuse", glm::vec3(1.0f)); // darken the light a bit to fit the scene
-		objectShader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		objectShader.setVec3("directLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+		objectShader.setVec3("light.position", cameraPos);
+		objectShader.setVec3("light.direction", cameraFront);
+		objectShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+		objectShader.setVec3("light.ambient", glm::vec3(0.5f));
+		objectShader.setVec3("light.diffuse", glm::vec3(0.5f)); // darken the light a bit to fit the scene
+		objectShader.setVec3("light.specular", glm::vec3(1.0f));
+		objectShader.setFloat("light.constant", 1.0f);
+		objectShader.setFloat("light.linear", 0.09f);
+		objectShader.setFloat("light.quadratic", 0.032f);
+		objectShader.setVec3("lightBox.position", lightPos);
+		objectShader.setVec3("lightBox.color", glm::vec3(1.0f, 0.0f, 0.0f));
+
+		objectShader.setVec3("sunLight.position", greenSunPos);
+		objectShader.setVec3("sunLight.direction", cameraFront * glm::radians(50.0f) *(float)glfwGetTime());
+		objectShader.setFloat("sunLight.cutOff", glm::cos(glm::radians(12.5f)));
+		objectShader.setVec3("sunLight.ambient", glm::vec3(0.5f));
+		objectShader.setVec3("sunLight.diffuse", glm::vec3(1.0f)); // darken the sunLight a bit to fit the scene
+		objectShader.setVec3("sunLight.specular", glm::vec3(1.0f));
+		objectShader.setFloat("sunLight.constant", 1.0f);
+		objectShader.setFloat("sunLight.linear", 0.09f);
+		objectShader.setFloat("sunLight.quadratic", 0.032f);
+		objectShader.setVec3("sunLight.color", glm::vec3(0.0f, 1.0f, 0.0f));
+		
 		objectShader.setFloat("material.shininess", 32.0f);
 		objectShader.setMat4("view", view);
 
@@ -299,7 +318,7 @@ int main()
 			glm::mat4 model = glm::mat4(1.0f);
 			model = glm::translate(model, cubePositions[i]);
 			float angle = 20.0f * i;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			
 			objectShader.setMat4("model", model);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -315,12 +334,20 @@ int main()
 		lampShader.setMat4("model", model);
 		lampShader.setMat4("projection", projection);
 		lampShader.setMat4("rotation", rotation);
-		lampShader.setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+		lampShader.setVec3("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
 		lampShader.setMat4("view", view);
 
 		glBindVertexArray(LampVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
+
+		// Draw green sun
+		glm::mat4 greenModel = glm::translate(glm::mat4(1.0f), greenSunPos);
+		
+		lampShader.setMat4("translate", glm::mat4(1.0f));
+		lampShader.setMat4("model", greenModel);
+		lampShader.setVec3("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
@@ -355,11 +382,11 @@ void processinput(GLFWwindow* window)
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
-		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 	{
-		cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 	}
 }
 
