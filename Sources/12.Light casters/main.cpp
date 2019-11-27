@@ -289,6 +289,7 @@ int main()
 		objectShader.setVec3("light.position", cameraPos);
 		objectShader.setVec3("light.direction", cameraFront);
 		objectShader.setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+		objectShader.setFloat("light.outerCutOff", glm::cos(glm::radians(15.0f)));
 		objectShader.setVec3("light.ambient", glm::vec3(0.5f));
 		objectShader.setVec3("light.diffuse", glm::vec3(0.5f)); // darken the light a bit to fit the scene
 		objectShader.setVec3("light.specular", glm::vec3(1.0f));
