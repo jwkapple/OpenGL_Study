@@ -1,4 +1,4 @@
-#include "modelclass.h"
+#include "meshclass.h"
 
 Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures)
 {
