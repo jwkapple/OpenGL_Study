@@ -12,7 +12,7 @@
 class Model
 {
 public:
-	Model(char *path)
+	Model(string const &path)
 	{
 		loadModel(path);
 	}
@@ -20,6 +20,7 @@ public:
 private:
 	vector<Mesh> meshes;
 	string directory;
+	vector<Texture> textures_loaded;
 
 	void loadModel(string path);
 	void processNode(aiNode* node, const aiScene* scene);

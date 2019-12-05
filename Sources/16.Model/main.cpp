@@ -3,11 +3,14 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "shader_s.h"
+#include "modelclass.h"
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "stb_image.h"
 #include <glm/glm/glm.hpp>
 #include <glm/glm/gtc/matrix_transform.hpp>
 #include <glm/glm/gtc/type_ptr.hpp>
+
 
 
 #define SCREEN_WIDTH 800
@@ -104,6 +107,7 @@ int main()
 
 	Shader objectShader("vertexShader.vs", "fragmentShader.fs");
 	Shader lampShader("lightVertexShader.vs", "lightFragmentShader.fs");
+	Shader nanoSuitShader("nanoSuitShader.vs", "nanoSuitShader.fs");
 
 	// Set viewport
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -177,7 +181,7 @@ int main()
 	// Vertex Array Object
 
 
-
+	Model ourModel("Data/nanosuit/nanosuit.obj");
 	
 
 	// Vertex Buffer Object
@@ -250,10 +254,12 @@ int main()
 
 		// rendering
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+
+		glClearColor(0.0f,0.25f,0.5f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+/*
 		float lightX = 2.0f * sin(glfwGetTime());
 		float lightY = -0.3f;
 		float lightZ = 1.5f * cos(glfwGetTime());
@@ -280,6 +286,8 @@ int main()
 		
 		objectShader.use();
 		
+
+
 		objectShader.setMat4("translate", model);
 		objectShader.setMat4("model", model);
 		objectShader.setMat4("projection", projection);
@@ -319,6 +327,7 @@ int main()
 		objectShader.setFloat("material.shininess", 32.0f);
 		objectShader.setMat4("view", view);
 
+
 		glBindVertexArray(VAO);
 		for (unsigned int i = 0; i < 10; i++)
 		{
@@ -355,6 +364,17 @@ int main()
 		lampShader.setMat4("model", greenModel);
 		lampShader.setVec3("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
 		glDrawArrays(GL_TRIANGLES, 0, 36);
+*/
+		nanoSuitShader.use();
+
+	    nanoSuitShader.setMat4("projection", projection);
+		nanoSuitShader.setMat4("view", view);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+		//model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+		nanoSuitShader.setMat4("model", model);
+		ourModel.Draw(nanoSuitShader);
 
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);

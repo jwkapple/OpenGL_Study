@@ -2,9 +2,9 @@
 
 Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures)
 {
-	vertices = this->vertices;
-	indices = this->indices;
-	textures = this->textures;
+	this->vertices = vertices;
+	this->indices = indices;
+	this->textures = textures;
 
 	SetupMesh();
 
@@ -15,7 +15,7 @@ void Mesh::Draw(Shader shader)
 	GLuint diffuseNr = 1;
 	GLuint specularNr = 1;
 
-	for (GLuint i = 0; i < indices.size(); i++)
+	for (GLuint i = 0; i < textures.size(); i++)
 	{
 		string name = textures[i].type;
 		string number;
@@ -31,16 +31,17 @@ void Mesh::Draw(Shader shader)
 			number = std::to_string(specularNr++);
 		}
 
-		shader.setFloat(("material." + name + number).c_str(), (GLfloat)i);
+		shader.setFloat(("material." + name + number), i);
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
 
-	glActiveTexture(GL_TEXTURE0);
+
 
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-
 	glBindVertexArray(0);
+	
+	glActiveTexture(GL_TEXTURE0);
 }
 
 void Mesh::SetupMesh()

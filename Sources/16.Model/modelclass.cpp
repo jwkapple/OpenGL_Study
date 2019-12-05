@@ -25,12 +25,18 @@ void Model::loadModel(string path)
 
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
+
+	int tmp2 = node->mNumMeshes;
 	for (GLuint i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh,scene));
+
+		Mesh tmp3 = processMesh(mesh, scene);
+
+		 meshes.push_back(tmp3);
 	}
 
+	int tmp = node->mNumChildren;
 	for (GLuint i = 0; i < node->mNumChildren; i++)
 	{
 		processNode(node->mChildren[i], scene);
@@ -49,10 +55,9 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene* scene)
 	for (GLuint i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
-
+		glm::vec3 vector;
 
 		// Vector
-		glm::vec3 vector;
 
 		vector.x = mesh->mVertices[i].x;
 		vector.y = mesh->mVertices[i].y;
@@ -61,13 +66,12 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene* scene)
 		vertex.position = vector;
 
 		// Normal
-		glm::vec3 normal;
 
-		normal.x = mesh->mNormals[i].x;
-		normal.y = mesh->mNormals[i].y;
-		normal.z = mesh->mNormals[i].z;
+		vector.x = mesh->mNormals[i].x;
+		vector.y = mesh->mNormals[i].y;
+		vector.z = mesh->mNormals[i].z;
 
-		vertex.normal = normal;
+		vertex.normal = vector;
 
 		// TexCoord
 		glm::vec2 texCoord;
@@ -99,18 +103,13 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene* scene)
 	}
 
 	// processing textures
-	if (mesh->mMaterialIndex >= 0)
-	{
+
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 		vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-	}
-	else
-	{
 
-	}
 
 	return Mesh(vertices, indices, textures);
 }
@@ -122,11 +121,27 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial *material, aiTextureType 
 	{
 		aiString str;
 		material->GetTexture(type, i, &str);
-		Texture texture;
-		texture.id = TextureFromFile(str.C_Str(), directory);
-		texture.path = str.C_Str();
-		texture.type = typeName;
-		textures.push_back(texture);
+		bool skip = false;
+
+		for (GLuint j = 0; j < textures_loaded.size(); j++)
+		{
+			if (std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
+			{
+				textures.push_back(textures_loaded[j]);
+				skip = true;
+				break;
+			}
+		}
+
+		if (!skip)
+		{
+			Texture texture;
+			texture.id = TextureFromFile(str.C_Str(), directory);
+			texture.path = str.C_Str();
+			texture.type = typeName;
+			textures.push_back(texture);
+			textures_loaded.push_back(texture);
+		}
 	}
 	return textures;
 }
