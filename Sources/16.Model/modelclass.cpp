@@ -26,17 +26,13 @@ void Model::loadModel(string path)
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
 
-	int tmp2 = node->mNumMeshes;
 	for (GLuint i = 0; i < node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
-		Mesh tmp3 = processMesh(mesh, scene);
-
-		 meshes.push_back(tmp3);
+		 meshes.push_back(processMesh(mesh, scene));
 	}
 
-	int tmp = node->mNumChildren;
 	for (GLuint i = 0; i < node->mNumChildren; i++)
 	{
 		processNode(node->mChildren[i], scene);

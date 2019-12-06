@@ -12,7 +12,7 @@ Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> text
 
 void Mesh::Draw(Shader shader)
 {
-	GLuint diffuseNr = 1;
+	GLuint diffaseNr = 1;
 	GLuint specularNr = 1;
 
 	for (GLuint i = 0; i < textures.size(); i++)
@@ -24,15 +24,18 @@ void Mesh::Draw(Shader shader)
 
 		if (name == "texture_diffuse")
 		{
-			number = std::to_string(diffuseNr++);
+			number = std::to_string(diffaseNr++);
 		}
 		else if (name == "texture_specular")
 		{
 			number = std::to_string(specularNr++);
 		}
 
-		shader.setFloat(("material." + name + number), i);
+
+
+		shader.setInt(("material." + name + number), i);
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+
 	}
 
 
@@ -52,8 +55,8 @@ void Mesh::SetupMesh()
 
 	glBindVertexArray(VAO);
 	
-	glBindBuffer(GL_VERTEX_ARRAY, VBO);
-	glBufferData(GL_VERTEX_ARRAY, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);

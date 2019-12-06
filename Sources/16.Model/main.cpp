@@ -259,112 +259,6 @@ int main()
 		glClearColor(0.0f,0.25f,0.5f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-/*
-		float lightX = 2.0f * sin(glfwGetTime());
-		float lightY = -0.3f;
-		float lightZ = 1.5f * cos(glfwGetTime());
-		glm::vec3 lightPos = glm::vec3(lightX, lightY, lightZ);
-
-		glm::vec3 lightColor;
-		lightColor.x = sin(glfwGetTime() * 2.0f);
-		lightColor.y = sin(glfwGetTime() * 0.7f);
-		lightColor.z = sin(glfwGetTime() * 1.3f);
-
-		glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-		glm::vec3 ambientColor = lightColor * glm::vec3(0.2f);
-
-	
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
-		
-
-		glm::mat4 model = glm::mat4(1.0f);
-
-		
-		objectShader.use();
-		
-
-
-		objectShader.setMat4("translate", model);
-		objectShader.setMat4("model", model);
-		objectShader.setMat4("projection", projection);
-		objectShader.setMat4("rotation", glm::mat4(1.0f));
-		objectShader.setInt("material.diffuse", 0);
-		objectShader.setInt("material.specular", 1);
-
-		// uLight
-		objectShader.setVec3("uLight.position", cameraPos);
-		objectShader.setVec3("uLight.direction", cameraFront);
-		objectShader.setFloat("uLight.cutOff", glm::cos(glm::radians(12.5f)));
-		objectShader.setFloat("uLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-		objectShader.setVec3("uLight.ambient", glm::vec3(1.0f));
-		objectShader.setVec3("uLight.diffuse", glm::vec3(1.0f)); // darken the light a bit to fit the scene
-		objectShader.setVec3("uLight.specular", glm::vec3(1.0f));
-		objectShader.setFloat("uLight.constant", 1.0f);
-		objectShader.setFloat("uLight.linear", 0.09f);
-		objectShader.setFloat("uLight.quadratic", 0.032f);
-
-		// uLightBox
-		objectShader.setVec3("uLight.color", glm::vec3(1.0f));
-		objectShader.setVec3("uLightBox.position", lightPos);
-		objectShader.setVec3("uLightBox.color", glm::vec3(1.0f, 0.0f, 0.0f));
-
-
-		// uSunLight
-		objectShader.setVec3("uSunLight.position", greenSunPos);
-		objectShader.setVec3("uSunLight.direction", cameraFront * glm::radians(50.0f) *(float)glfwGetTime());
-		objectShader.setVec3("uSunLight.ambient", glm::vec3(0.5f));
-		objectShader.setVec3("uSunLight.diffuse", glm::vec3(1.0f)); // darken the sunLight a bit to fit the scene
-		objectShader.setVec3("uSunLight.specular", glm::vec3(1.0f));
-		objectShader.setFloat("uSunLight.constant", 1.0f);
-		objectShader.setFloat("uSunLight.linear", 0.09f);
-		objectShader.setFloat("uSunLight.quadratic", 0.032f);
-		objectShader.setVec3("uSunLight.color", glm::vec3(0.0f, 1.0f, 0.0f));
-		
-		objectShader.setFloat("material.shininess", 32.0f);
-		objectShader.setMat4("view", view);
-
-
-		glBindVertexArray(VAO);
-		for (unsigned int i = 0; i < 10; i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i;
-			
-			objectShader.setMat4("model", model);
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-
-
-	
-		lampShader.use();
-
-		model = glm::translate(model, lightPos);
-
-		lampShader.setMat4("translate", model);
-		lampShader.setMat4("model", model);
-		lampShader.setMat4("projection", projection);
-		lampShader.setMat4("rotation", rotation);
-		lampShader.setVec3("lightColor", glm::vec3(1.0f, 0.0f, 0.0f));
-		lampShader.setMat4("view", view);
-
-		glBindVertexArray(LampVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-		// Draw green sun
-		glm::mat4 greenModel = glm::translate(glm::mat4(1.0f), greenSunPos);
-		
-		lampShader.setMat4("translate", glm::mat4(1.0f));
-		lampShader.setMat4("model", greenModel);
-		lampShader.setVec3("lightColor", glm::vec3(0.0f, 1.0f, 0.0f));
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-*/
 		nanoSuitShader.use();
 
 	    nanoSuitShader.setMat4("projection", projection);
@@ -372,8 +266,9 @@ int main()
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-		//model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
 		nanoSuitShader.setMat4("model", model);
+
 		ourModel.Draw(nanoSuitShader);
 
 		// check and call events and swap the buffers
