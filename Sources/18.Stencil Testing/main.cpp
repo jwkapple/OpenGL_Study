@@ -25,9 +25,9 @@ void processinput(GLFWwindow* window);
 unsigned int loadTexture(const char *path);
 
 // camera
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 10.0f);
+glm::vec3 cameraPos = glm::vec3(0.0f, 1.0f, 10.0f);
 glm::vec3 greenSunPos = glm::vec3(-10.0f, 0.0f, -1.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, -0.3f, -1.0f);
 const glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f,0.0f);
 
 glm::vec3 lightPos = glm::vec3(0.0f, 3.0f, 3.0f);
@@ -71,19 +71,21 @@ int main()
 	// depth buffer
 	// -------------------
 	glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_ALWAYS);
+	glDepthFunc(GL_LESS);
 	//glDepthMask(GL_FALSE);
 	
 	// stencil buffer
 	// -------------------
 	glEnable(GL_STENCIL_TEST);
-
+	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	// shader& model initialize
 	// ------------------------------------
 	Model ourModel("Data/nanosuit/nanosuit.obj");
 	Shader nanoSuitShader("nanoSuitShader.vs", "nanoSuitShader.fs");
 	Shader woodFloor("woodFloor.vs", "woodFloor.fs");
 	Shader single("shaderSingleColor.vs", "shaderSingleColor.fs");
+	Shader doub("shaderSingleColor2.vs", "shaderSingleColor2.fs");
 
 	// wood 
 	float planeVertices[] = {
@@ -201,14 +203,14 @@ int main()
 	// -----------------------------------
 
 	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::rotate(model, glm::radians(10.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(30.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	// projection matrix
 	glm::mat4 projection = glm::mat4(1.0f);
 	
 	glm::vec3 arr[] =
 	{
-		glm::vec3(0.0f),
+		glm::vec3(1.0f,0.0f,1.0f),
 		glm::vec3(3.0f, 0.0f, 4.0f)
 	};
 
@@ -233,7 +235,7 @@ int main()
 		glGetString(GL_VENDOR);
 		// rendering
 
-		glClearColor(0.0f,0.0f,0.0f,1.0f);
+		glClearColor(0.0f,0.0f,0.5f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 
@@ -257,6 +259,8 @@ int main()
 
 		// Floor
 
+		glStencilMask(0x00);
+
 		woodFloor.use();
 
 		glActiveTexture(GL_TEXTURE0);
@@ -273,58 +277,67 @@ int main()
 		woodFloor.setBool("blinn", blinn);
 		woodFloor.setMat4("model", glm::mat4(1.0f));
 
-		woodFloor.use();
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 
+		glBindVertexArray(0);
+
 		// Container
+		
+
+
+		doub.use();
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, container);
 
+		doub.setMat4("view", view);
+		doub.setMat4("projection", projection);
+		doub.setFloat("diffuseMap", 0);
 
-		glBindVertexArray(VAO2);
-		
+		single.use();
+		single.setMat4("view", view);
+		single.setMat4("projection", projection);
+
 		for (GLuint i = 0; i < 2; i++)
 		{
-
+			
 			glStencilFunc(GL_ALWAYS, 1, 0xFF);
 			glStencilMask(0xFF);
 
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, arr[i]);
-			woodFloor.setMat4("model", model);
 
+			doub.use();
+			doub.setMat4("model", model);
+
+			glBindVertexArray(VAO2);
 			glDrawArrays(GL_TRIANGLES, 0, 36);
+			
 
 			glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
 			glStencilMask(0x00);
 			glDisable(GL_DEPTH_TEST);
 
-			model = glm::scale(model, glm::vec3(1.5f));
+			model = glm::scale(model, glm::vec3(1.1f));
+			glBindVertexArray(VAO2);
 			single.use();
-			glDrawArrays(GL_TRIANGLES, 0, 36);
+			single.setMat4("model", model);
 
-			glStencilMask(0xFF);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+;
 			glEnable(GL_DEPTH_TEST);
+			glStencilMask(0xFF);
 			
 		}
-		
-		for (GLuint i = 0; i < 2; i++)
-		{
-
-		}
-
-		
-		
-
-
+	
+		glBindVertexArray(0);
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();  
 
-		
+		glClear(GL_STENCIL_BUFFER_BIT);
 	}
 	
 	glfwTerminate();
