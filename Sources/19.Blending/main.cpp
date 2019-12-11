@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <map>
 #include "shader_s.h"
 #include "modelclass.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -77,7 +78,12 @@ int main()
 	// -------------------
 	glEnable(GL_STENCIL_TEST);
 	glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+
+	// blending
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	// shader& model initialize
 	// ------------------------------------
 	Model ourModel("Data/nanosuit/nanosuit.obj");
@@ -86,7 +92,7 @@ int main()
 	Shader woodFloor("woodFloor.vs", "woodFloor.fs");
 	Shader single("shaderSingleColor.vs", "shaderSingleColor.fs");
 	Shader doub("shaderSingleColor2.vs", "shaderSingleColor2.fs");
-	Shader grassShader("grassShader.vs", "grassShader.fs");
+	Shader windowShader("windowShader.vs", "windowShader.fs");
 
 	// wood 
 	float planeVertices[] = {
@@ -183,15 +189,15 @@ int main()
 		1.0f,  0.5f,  0.0f,  1.0f,  0.0f
 	};
 
-	// grass initialize
+	// window initialize
 
-	GLuint grassVAO, grassVBO;
+	GLuint windowVAO, windowVBO;
 	
-	glGenVertexArrays(1, &grassVAO);
-	glBindVertexArray(grassVAO);
+	glGenVertexArrays(1, &windowVAO);
+	glBindVertexArray(windowVAO);
 
-	glGenBuffers(1, &grassVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, grassVBO);
+	glGenBuffers(1, &windowVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, windowVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), &transparentVertices, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)0);
@@ -206,6 +212,8 @@ int main()
 	vegetation.push_back(glm::vec3(0.0f, 0.0f, 0.7f));
 	vegetation.push_back(glm::vec3(-0.3f, 0.0f, -2.3f));
 	vegetation.push_back(glm::vec3(0.5f, 0.0f, -0.6f));
+
+	map<float, glm::vec3> sorted;
 
 
 	// box initialize
@@ -228,7 +236,7 @@ int main()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (void*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
 
-	unsigned int grass = loadTexture("Data/grass.png");
+	unsigned int windowTexture = loadTexture("Data/window.png");
 	unsigned int container = loadTexture("Data/container2.png");
 
 	// Set viewport
@@ -248,8 +256,8 @@ int main()
 	
 	glm::vec3 arr[] =
 	{
-		glm::vec3(1.0f,0.0f,1.0f),
-		glm::vec3(3.0f, 0.0f, 4.0f)
+		glm::vec3(0.0f,0.0f,-1.0f),
+		glm::vec3(2.0f, 0.0f, -4.0f)
 	};
 
 
@@ -270,28 +278,18 @@ int main()
 		// Input
 		processinput(window);
 
+		for (GLuint i = 0; i < vegetation.size(); i++)
+		{
+			float distance = glm::length(cameraPos - vegetation[i]);
+			sorted[distance] = vegetation[i];
+		}
+
 		glGetString(GL_VENDOR);
 		// rendering
 
 		glClearColor(0.0f,0.0f,0.5f,1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-
-		/*// nanosuit
-		nanoSuitShader.use();
-
-	    nanoSuitShader.setMat4("projection", projection);
-		nanoSuitShader.setMat4("view", view);
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, -2.50f, 0.0f)); // translate it down so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// it's a bit too big for our scene, so scale it down
-		nanoSuitShader.setMat4("model", model);
-		nanoSuitShader.setVec3("lightPos", lightPos);
-		nanoSuitShader.setVec3("cameraPos", cameraPos);
-		
-		n.Draw(nanoSuitShader);
-		*/
 
 		// Floor
 
@@ -316,33 +314,6 @@ int main()
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		
-
-		// grass
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, grass);
-
-		grassShader.use();
-
-		grassShader.setMat4("view", view);
-		grassShader.setMat4("projection", projection);
-		grassShader.setFloat("texture1", 0);
-
-		glBindVertexArray(grassVAO);
-
-		for (GLuint i = 0; i < vegetation.size(); i++)
-		{
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, vegetation[i]);
-			grassShader.setMat4("model", model);
-
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
-
-		
-		
 		
 
 		// Container
@@ -360,6 +331,7 @@ int main()
 		single.setMat4("view", view);
 		single.setMat4("projection", projection);
 
+		glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 		for (GLuint i = 0; i < 2; i++)
 		{
 			
@@ -391,13 +363,40 @@ int main()
 			glStencilMask(0xFF);
 			
 		}
+
+		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+		glClear(GL_STENCIL_BUFFER_BIT);
+
+		// window
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, windowTexture);
+
+		windowShader.use();
+
+		windowShader.setMat4("view", view);
+		windowShader.setMat4("projection", projection);
+		windowShader.setFloat("texture1", 0);
+
+		glBindVertexArray(windowVAO);
+
+		for (map<float, glm::vec3>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it)
+		{
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, it->second);
+			windowShader.setMat4("model", model);
+
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+
+
 	
 		glBindVertexArray(0);
 		// check and call events and swap the buffers
 		glfwSwapBuffers(window);
 		glfwPollEvents();  
 
-		glClear(GL_STENCIL_BUFFER_BIT);
+		
 	}
 	
 	glfwTerminate();
