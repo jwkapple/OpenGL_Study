@@ -1,0 +1,20 @@
+framebuffer의 조건
+1. 최소한 하나의 buffer를 attach 해야한다 (color,depth or stencil)
+2. 최소한 하나의 color attachment가 있어야한다.
+3. 모든 attachment 들은 메모리 예약이 완료되어있어야한다.
+4. 모든 buffer 들은 같은 수의 samples를 가지고 있어야한다.
+
+~off-screen rendering
+rendering operation들이 default framebuffer가 아닌 프로그래머가 설정한 
+custom frame buffer에 이루어지면서 화면에는 효과가 일어나지 않는 것
+
+* FrameBuffer 에서의 
+texture -> 외부에서 읽기에 용이
+renderbuffer -> depth,stencil 과 같이 외부의 sample이 일어나지 않는 경우에 용이 
+
+~grayscale 방법
+common : 
+모든 R G B 값의 총합의 평균을 사용한다.
+
+accurate :
+ float average = 0.2126 * FragColor.r + 0.7152 * FragColor.g + 0.0722 * FragColor.b;

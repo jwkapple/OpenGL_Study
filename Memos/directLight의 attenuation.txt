@@ -1,0 +1,23 @@
+Attenuation Equation
+
+Kc : constant term
+-> The constant usually kept at 1.0 which is mainly there to make sure 
+    the resulting denominator never gets smaller than 1 since it would otherwise boost
+    the intensity with certain distances, which is not the effect we're looking for.
+
+Kl : linear term
+-> The linear term is multiplied with the distance value that reduces the intensity in a linear fashion
+
+Kq : quadratic term
+-> 이차 방정식 term 은 거리의 제곱값 과 곱해지게 된다. 이 부분은 
+    일정거리이하에선 linear term 보다 영향이 덜 하겠지만 거리가 증가함에 있어
+    눈에 띄는 영향을 가지게 된다.
+
+quadratic term 에의해 빛은 초반엔 선형적인 변화를 보이다가 일정 거리를 넘어서게 되면
+빛의 세기의 감쇠의 정도가 눈의 띄게 가속되게 될것이다. 이의 결과로
+근거리의 빛의 세기는 상당히 강하게 표현되지만, 거리가 증가함에 따라 눈에 띄게 감소하게 될것이고
+결국 점점 느리게 감소하게 될것이다. 
+
+Choosing the right values
+그럼 이러한 3개의 요소는 어떤 값은 상황에 따라 맞는 값이 달라질 수 도 있다:
+주변환경, 본인이 원하는 빛이 비추는 거리, 빛의 종류등에 따라

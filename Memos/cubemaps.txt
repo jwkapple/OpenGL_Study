@@ -1,0 +1,5 @@
+
+LoadCubemap() function을 구성하는 도중 return 문을 실수로 for문안에 넣어서 지속적으로 만들어지는 
+반환값을 계속 한 value 넣게 하는 실수를 해버렸다. 우연히  bug report칸안에 주의 목록을 보다가 찾았다;;
+
+

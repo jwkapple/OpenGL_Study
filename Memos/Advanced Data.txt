@@ -1,0 +1,30 @@
+GL_ELEMENT_ARRAY_BUFFER 
+- openGL 내부적으로 들어오는 데이터를 판단해 접근을 한다.
+
+glBufferData
+- data argument를 NULL로 설정해주면 나주에 삽입될 데이터의 공간을 확보하는데 유용하다.
+
+glBufferSubData
+- 한번에 모든 메모리공간에 데이터를 넣는 것과 달리  offset을 설정해주면서 메모리상 특정 부분부터 data를 삽입하게 해준다.
+* 최초에 메모리 할당을 해야하므로 glBufferData 이후에 사용가능
+
+glMapBuffer 
+- 현재 bound된 buffer의 포인터를 return 한다. 이를 통해 직접 데이터를 buffer상에 복사해 넣을 수 있다.
+*glUnmapBuffer - openGL이 맵핑이 끝났다는걸 알고 이전 포인터는 소멸되고 성공적으로 데이터 복사가 완료 되었으면  GL_TRUE를 return 한다.
+
+vertex Attribute 에서의 glBufferSubData
+- 지금까지는 glVertexAttribPointer를 통해 stride를 설정함으로 데이터를 interleaved한 상태로 가져왔다 (123123123) .
+하지만 이제 glBufferSubData를 사용함으로써 미리 저장할 데이터들을 정렬한후 이를 각각의 위치에 복사해 넣을 수 있게 되었다. 
+
+glCopyBufferSubData
+- buffer의 내용을 다른 종류의 buffer에 복사할 수 있게 해준다. 
+
+void glCopyBufferSubData(GLenum readtarget, GLenum writetarget, GLintptr readoffset, GLintptr writeoffset, GLsizeptr size);
+
+하지만 만약 같은 종류의 buffer 일 경우엔 어떻게 하는가?
+이런 경우를 위해 openGL에는 두가지의 buffer종류를 옵션으로 더 준다.
+
+GL_COPY_READ_BUFFER / GL_COPY_WRITE_BUFFER
+
+
+
