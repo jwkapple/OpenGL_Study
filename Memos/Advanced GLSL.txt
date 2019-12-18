@@ -1,0 +1,28 @@
+Vertex shader variables
+
+1.gl_PointSize
+- GL_POINTS 로 그릴때 해당 point의 사이즈를 조정할 수 있다.
+*GL_POINTS -> 포인터 형식으로 그려준다.
+
+2. gl_VertexID (only read)
+- glDrawElements 경우 : 현재 index 를 저장
+  glDrawArrays 경우 : 현재까지 processing 한 vertex의 수를 저장
+
+
+Fragment shader variables
+
+1.gl_FragCoord
+- window-space의 coordinates를 저장
+이를 이용해 window-space상의 위치에 따른 다양한 활용가능
+ex. coordinates에 따라 lighting을 다르게 설정해 차이점 확인
+
+2.gl_FrontFacing
+
+
+3.gl_FragDepth
+-gl_FragCoord에 경우 depth 값에대해 오직 read만 가능한거에 비해 
+gl_FragDepth를 통해 직접 해당 fragment의 depth값을 설정할 수 있다.
+
+disadvantage) gl_FragDepth를 사용하면 모든 early depth testing이 disable 된다. 
+버전 4.2 부터는 이에 몇가지 조건을 달아 몇몇의 early depth testing이 가능하도록 해준다.
+layout (depth_<condition>) out float gl_FragDepth;

@@ -1,0 +1,18 @@
+
+glDrawArraysInstanced / glDrawElementsInstanced
+- 한번의 draw call 동시에 수십개의 instance를 생성할 수 있다.
+
+gl_InstanceID
+- instance draw call 매회당 1씩 증가. 이를 통해 각 instance에 따라
+다르게 설정이 가능하다.
+
+instanced arrays 
+- vertex attribute로 define
+gl_InstanceID를 이용한 array 접속을 안해도 instance의 속성을 바꿀 수 있다. 
+
+
+glVertexAttribDivisor
+- 지정된 vertex attribute가 몇번의 instancing 후 바꿀지 지시 할 수 있다. 
+0의 경우 vertex shader의 반복마다, 1의 경우 매 instancing마다 
+2의 경우 짝수번째 instancing 마다 등등..
+
