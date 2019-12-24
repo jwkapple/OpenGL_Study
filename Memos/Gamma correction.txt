@@ -1,0 +1,54 @@
+
+Gamma correction 
+
+모니터는 실제 인간이 받아드리는 빛의 세기와 다르게 빛을 표출한다.
+(ex. 인간은 0.5의 밝기를 두배하면 1.0라고 인지하지만 실제 모니터는 0.5를 0.281로 표시하기 때문에 
+인간기준의 2배를 올려버리면 무려 약4배의 밝기를 표시하게 된다)
+이를위해 보정하는 과정을 Gamma correction이라고 한다. 
+
+[과정]
+1. 구하고싶은 값을 inversed curve line에 대입한다
+2. 대입한 값을 다시 CRT gamma line에 대입한다. 
+
+*결론) 실제 사용자가 대입한 값을 더 밝게 하여 CRT상에서 더 높은 지점에 위치하도록 한다.
+** gamma value인 2.2는 모든 모니터의 디스플레이 평균적인 값이다.
+이러한 값을 적용한 color space를 sRGB color space라 한다. 
+
+
+Gamma correction 적용법
+1. OpenGL에 내장된 sRGB framebuffer 사용
+2. fragment shader에서 수동으로 Gamma Correction 적용
+
+(1) OpenGL에 내장된 sRGB framebuffer 사용
+
+glEnable(GL_FRAMEBUFFER_SRGB) 만 적용하면 자동으로 color buffer 로
+옮기기전에 gamma correction이 이루어진다. 
+*주의점 - glEnable(GL_FRAMEBUFFER_SRGB)는 각 framebuffer마다 적용되는 
+과정이므로 만약 여러개의 framebuffer를 사용하고 있다면 최종적으로 화면에 출력을 담당하는
+framebuffer에서만 상용되도록 설정해야한다.
+
+(2) fragment shader에서 수동으로 Gamma Correction 적용
+
+간단히 final color에 1.0/2.2 승을 하면된다. 
+*단점 - 최종 화면에 영향을 주는 모든 fragment shader에 다 일일히 적용해야한다.
+
+
+sRGB textures
+
+실제 artist들은 sRGB space 상에서 작업을 하기 때문에 이는 non linear한 빛의 세기를 가지게 된다. 
+이를 실제로 gamma correction 하기위해선 다시 해당 texture을 일반 linear space 상으로 옮기는 과정이 필요하다.
+
+GL_SRGB / GL_SRGB_ALPHA
+
+이를 모든 shader에 적용하기엔 너무 번거러움으로 OpenGL이 제공하는 솔루션을 사용하도록 한다. 
+glTexImage2D(GL_TEXTURE_2D,0, ** GL_SRGB **, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+OpenGL이 자동으로 해당 색상을 linear space상으로 변환시켜준다.
+
+attenuation
+
+지금까지 lighting에 적용된 attenuation에선 1/distance를 더 많이 써왔다.
+하지만 sRGB 공간상에서 해당 방식은 너무 미미한 결과를 보여주므로 
+1/ (distance * ditance) 을 사용하는게 좋다.
+
+
+
