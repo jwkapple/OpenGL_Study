@@ -18,8 +18,6 @@ layout (std140) uniform Matrices
 
 uniform mat4 model;
 
-
-
 void main()
 {
 gl_Position = projection * view * model * vec4(aPos,1.0);
@@ -32,7 +30,5 @@ Pos = vec3(model * vec4(aPos, 1.0));
 	vec3 N = normalize(vec3(model * vec4(aNormal, 0)));
 
 TBN = mat3(T, B, N);
-
-
 
 }
