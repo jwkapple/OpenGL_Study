@@ -1,0 +1,5 @@
+shadow mapping mistake
+
+ortho, perspective 더 공부하기
+
+******** texture의 주소를 지정할땐 float가 아니라 int이다;;;

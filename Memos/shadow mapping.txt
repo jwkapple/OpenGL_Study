@@ -1,0 +1,65 @@
+~Shadow Mapping~
+
+Basic Idea
+
+빛의 관점에서 생각해보자. 
+아주 간단하게 생각해보면 빛이 보이지 않는 부분에 그림자가 진다고 생각한다.
+
+1. light에서 closest한 point를 찾는다.
+2. 해당 ray상에서 1에서 찾은 point보다 먼 지점은 shadow가 생긴다고 가정한다.
+-> 너무 많은 계산량을 욕한다. 대신에 depth buffer을 사용한다.
+
+depth testing 챕터에서 배웠듯이 depth buffer은 camera's POV를 기준으로 저장된다.
+만약 이때 light의 POV를 기준으로 저장하면 위의 과정을 바로 해결할 수 있다!
+이러한 결과는 depth map (shadow map) 저장된다.
+
+depth map 제작법
+-> 해당 light source에 맞는 
+projection & view matrix를 사용하여 랜더링(light's perspective)
+
+이 projection & view matrix 를 이용해 모든 3D position을 
+light's visible coordinate space 로 변경하는 행렬 T를 생성
+
+
+*glDrawBuffer(GL_NONE) & glWriteBuffer(GL_NONE)으로 설정함으로써
+framebuffer에게 color buffer는 설정하지 않는다고 말한다.
+
+The depth map 
+*depthmap 제작이후 반드시 glViewport()를 재설정한다.
+
+Light space transform
+->depthMap을 굽고난 후 일반 렌더링시 현재 camera's view에서 보이는 pixel을
+light's view로 변환시켜주는 matrix
+
+shadow acne
+-> shadow mapping시 생기는 평행한 검은 줄
+
+shadow bias 
+-> shadow map 의 depth value를 임의로 올려 shadow acne를 피할 수 있다
+but 급격하게 꺾이는 각도에 부분엔 여전히 acne 가 일어나는데 이의 해결법으론 각도에 따라 다르게 적용하는 것이다.   
+
+Peter panning
+-> shadow bias로 직접적으로 depth value를 조작함으로 생기는 눈에 띄는 그림자가 어긋나는 현상                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+해결법 : depth map 렌더링시 front-face culling으로 설정해 오브젝트의 뒷면이 렌더링되도록한다 (어차피 depth value만 판단함으로 신경 X)
+* 미리 glEnable(GL_CULL_FACE); 하는거 잊지 말자
+
+Over sampling 
+-> 렌더링후 특정 지역이 마치 shadow가 있는거 처럼 보이는 부분이 있는데 이는 해당 부분이 light's view 상에서 depth map에
+저장이 되지 않았기 때문이다. (또한 이전에 GL_REPEAT로 wrapping option으로 맞추어 두어 이런 부분이 지속된다)
+해결법 : 미리 border color array를 지정 하고 wrapping option에서 GL_CLAMP_TO_BORDER로 설정하여 해당되지 않는 부분은
+전부 shadow가 없다고 처리한다.
+* 이를 사용해도 검은 부분이 있을 때가 있는데 이는 해당 부분의 z값이 far plane 보다 크기 때문에 항상 1.0 값을 넘어가면서
+currentDepth - bias > closestDepth 이 항상 true를 반환하기 때문이다. 
+이는 shader에서 만약 z값이 1을 넘으면 그냥 shadow = 0 처리하면 된다
+
+PCF(percentage-closer filtering) - soft shadow을 생성하는 filtering을 일컫는 단어
+-> PCF 보완전에 shadow를 보면 매우 까끌까끌(?) 거리는데 이는 제한된 resolution 의 depthMap을 여러 fragment가 동시에
+참고하면서 발생하는 현상
+해결법 : 현재 구할려는 fragment가 참고하는 depthMap 주변 texel의 값들도 참고하여 (1 | 0으로 구분) 해당 값들의 평균값을
+shadow value 로 설정 
+
+
+Orthographic vs projection 
+
+orthographic) 방향성이 없이 모든 그림자가 평행함으로 directional light에 적합
+projection)
