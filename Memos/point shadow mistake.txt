@@ -1,0 +1,5 @@
+
+view 를 while문에서 빼버려 실시간으로 수정 못되게 만들어버렸다.
+
+depthMap texture 제작시 glTexParameter에서 
+GL_TEXTURE_CUBE_MAP을 GL_TEXTURE_2D라고 해버렸다;;;

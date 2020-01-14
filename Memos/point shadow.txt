@@ -1,0 +1,16 @@
+
+이전에 배운 shadow mapping 은 directional light 에선 쓸만하지만 point light 같은
+정해진 위치가 있는 light에서는 쓸 수 없음으로 이러한 light에서 사용할 수 있는 point shadow를 배워본다.
+
+기본적으로 point shadow를 구현하는 방법은 여러가지가 있지만 여기서는 효율적인 rendering이 가능한
+cubemap을 이용해 만들어본다.
+
+
+PCF
+
+전에 배운 shadow mapping 때와 비슷한 접근법으로 간다. 하지만 point shadow에 경우엔 sample할 곳을 삼차원 공간에서 받아옴으로 이를 유념해야한다.
+그런데 만약 point mapping 에서 이전과 동일하게 sampling 해버리면 너무 쓸데없는 부분도 포함해 많이 sampling 해버린다! 이를 하지 않기 위한 꼼수를 소개한다.
+
+1. shader에 처음부터 sampling 할 위치들을 지정한 array를 넣는다. 
+2. 이를 기반으로 sampling 함으로써 필요한 부분만 sampling 한다.
+
