@@ -1,0 +1,36 @@
+
+HDR(High Dynamic Range)
+<-> LDR(Low Dynamic Range)
+
+여러 light 를 rendering 하게 되면 각각의 light의 영향에 의해 color value 가 1.0을 넘어가는 경우가 있는데 
+이렇게 되면 해당 부분들이 모두 하얀색(...)을 표시하게 되는 문제가 발생하는데 이를 해결하기위해
+
+애초에 fragment color가 1.0을 넘어가는걸 허용하고 이를 다시 [0,1] range로 변경해주는 과정을 HDR이라고 한다. 
+
+tone mapping : HDR을 LDR로 바꾸는 과정
+
+HDR의 장점 
+
+1) LDR의 범위를 넘어가면서 더 많은 detail을 보존할 수 있다.
+2) light source의 intensity를 진짜로 표시할 수 있다 
+(ex. flashlight 보단 sun이 더 밝지만 LDR상으로는 둘다 1.0으로 표현되지만 HDR상에선 확실히 구별할 수 있다)
+
+Floating point framebuffer (GL_RGBA16F, GL_RGB32F 등)
+기존 framebuffer상에서 internal format을 GL_RGB로 설정하게 되면 openGL은 자동으로 color value를 [0,1]로 clamp 해버리게 된다.
+이를 위해 GL_RGBA16F 등을 사용하면 이러한 clamping 이 일어나지않고 1.0값을 넘는 값을 framebuffer에 저장하게 된다.
+
+Tone mapping 
+
+~~ reinhard tone mapping ~~
+void main()
+{             
+    const float gamma = 2.2;
+    vec3 hdrColor = texture(hdrBuffer, TexCoords).rgb;
+  
+    // reinhard tone mapping
+    vec3 mapped = hdrColor / (hdrColor + vec3(1.0));
+    // gamma correction 
+    mapped = pow(mapped, vec3(1.0 / gamma));
+  
+    FragColor = vec4(mapped, 1.0);
+}   

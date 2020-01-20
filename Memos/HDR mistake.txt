@@ -1,0 +1,8 @@
+
+1)받아오는 texture에 따른 internalFormat과 dataFormat 구분을 하지않아 
+gammaCorrection의 영향이 미미했다
+(예전 gamma correction 때 고치지 못한 부분)
+
+2)GL_DEPTH_COMPONENT를 잘못 입력했다.
+
+3) glFramebufferTexture2D에 잘못된 texture를 넣었다;;;
